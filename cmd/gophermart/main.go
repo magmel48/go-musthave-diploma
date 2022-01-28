@@ -27,6 +27,9 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGKILL, syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
+	eg, ctx := errgroup.WithContext(ctx)
+
+	// FIXME ask mentor if before or after
 	server := http.Server{
 		Addr:        cfg.BaseServiceAddress,
 		IdleTimeout: time.Second,
@@ -34,8 +37,6 @@ func main() {
 			return ctx
 		},
 	}
-
-	eg, ctx := errgroup.WithContext(ctx)
 
 	eg.Go(func() error {
 		log.Println("starting loyal system service...")
