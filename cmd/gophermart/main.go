@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
-	"github.com/alexflint/go-arg"
+	"github.com/magmel48/go-musthave-diploma/internal/config"
+	"github.com/magmel48/go-musthave-diploma/internal/logger"
+	"github.com/magmel48/go-musthave-diploma/internal/routes"
 	"golang.org/x/sync/errgroup"
 	"log"
 	"net"
@@ -12,27 +14,23 @@ import (
 	"time"
 )
 
-type config struct {
-	BaseServiceAddress    string `arg:"-a,env:RUN_ADDRESS" default:"localhost:8080"`
-	DatabaseDSN           string `arg:"-d,env:DATABASE_URI"`
-	AccrualServiceAddress string `arg:"-r,env:ACCRUAL_SYSTEM_ADDRESS" default:"localhost:8081"`
-}
-
 func main() {
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
-
-	cfg := config{}
-	arg.MustParse(&cfg)
+	defer func() {
+		// each application should flush logs before actual closing
+		err := logger.Sync()
+		if err != nil {
+			panic(err)
+		}
+	}()
 
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGKILL, syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
 	eg, ctx := errgroup.WithContext(ctx)
-
-	// FIXME ask mentor if before or after
 	server := http.Server{
-		Addr:        cfg.BaseServiceAddress,
+		Addr:        config.BaseServiceAddress,
 		IdleTimeout: time.Second,
+		Handler:     routes.Handler(),
 		BaseContext: func(listener net.Listener) context.Context {
 			return ctx
 		},
