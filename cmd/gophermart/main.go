@@ -26,11 +26,18 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGKILL, syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
+	// FIXME think about passing context into the app
+	app := routes.App{}
+	err := app.Init()
+	if err != nil {
+		panic(err)
+	}
+
 	eg, ctx := errgroup.WithContext(ctx)
 	server := http.Server{
 		Addr:        config.BaseServiceAddress,
 		IdleTimeout: time.Second,
-		Handler:     routes.Handler(),
+		Handler:     app.Handler(),
 		BaseContext: func(listener net.Listener) context.Context {
 			return ctx
 		},
