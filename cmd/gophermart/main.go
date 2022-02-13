@@ -6,7 +6,6 @@ import (
 	"github.com/magmel48/go-musthave-diploma/internal/controllers"
 	"github.com/magmel48/go-musthave-diploma/internal/logger"
 	"golang.org/x/sync/errgroup"
-	"log"
 	"net"
 	"net/http"
 	"os/signal"
@@ -15,25 +14,19 @@ import (
 )
 
 func main() {
-	defer func() {
-		// each application should flush logs before actual closing
-		err := logger.Sync()
-		if err != nil {
-			panic(err)
-		}
-	}()
+	// no error handling here, see https://github.com/uber-go/zap/issues/880
+	defer logger.Sync()
 
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGKILL, syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
-	// FIXME think about passing context into the app
-	app := controllers.App{}
+	eg, ctx := errgroup.WithContext(ctx)
+	app := controllers.App{Context: ctx}
 	err := app.Init()
 	if err != nil {
 		panic(err)
 	}
 
-	eg, ctx := errgroup.WithContext(ctx)
 	server := http.Server{
 		Addr:        config.BaseServiceAddress,
 		IdleTimeout: time.Second,
@@ -44,18 +37,18 @@ func main() {
 	}
 
 	eg.Go(func() error {
-		log.Println("starting loyal system service...")
+		logger.Info("starting loyal system service...")
 		return server.ListenAndServe()
 	})
 
 	eg.Go(func() error {
 		<-ctx.Done()
 
-		log.Println("stopping the service...")
+		logger.Info("stopping the service...")
 
 		err := server.Shutdown(ctx)
 		return err
 	})
 
-	log.Println(eg.Wait())
+	eg.Wait()
 }

@@ -1,6 +1,33 @@
 version: "3.9"
 
 services:
+  app:
+    container_name: app_container
+    image: golang/1.17.7
+    environment:
+      RUN_ADDRESS: "${RUN_ADDRESS}"
+      ACCRUAL_SYSTEM_ADDRESS: "${ACCRUAL_SYSTEM_ADDRESS}"
+      DATABASE_URI: "${DATABASE_URI}"
+    build:
+      dockerfile: Dockerfile
+      context: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    links:
+      - postgres
+    networks:
+      - diploma
+
+# TODO run accrual also as alpine+copy linux distribution file
+#  accrual:
+#    container_name: accrual_container
+#    environment:
+#      RUN_ADDRESS: "${ACCRUAL_SYSTEM_ADDRESS}"
+#    networks:
+#      - diploma
+
   postgres:
     container_name: postgres_container
     image: postgres:14.1
@@ -29,6 +56,7 @@ services:
           - postgres
 
   migrate:
+    container_name: migrate_container
     image: migrate/migrate
     volumes:
       - ./migrations:/migrations

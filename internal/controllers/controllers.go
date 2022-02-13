@@ -1,19 +1,22 @@
 package controllers
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
+	_ "github.com/jackc/pgx/v4/stdlib"
 	"github.com/magmel48/go-musthave-diploma/internal/config"
 	"github.com/magmel48/go-musthave-diploma/internal/users"
 	"time"
 )
 
 type App struct {
-	db    *sql.DB
-	users users.Repository
+	Context context.Context
+	db      *sql.DB
+	users   users.Repository
 }
 
 func (app *App) Init() error {
