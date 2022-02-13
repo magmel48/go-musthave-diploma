@@ -1,4 +1,4 @@
-# go-musthave-diploma-tpl
+# go-musthave-diploma
 
 ## Run locally
 
