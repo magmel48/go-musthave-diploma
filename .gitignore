@@ -24,3 +24,4 @@ vendor/
 
 # Misc
 .env
+pgadmin/
