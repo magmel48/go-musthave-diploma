@@ -40,7 +40,7 @@ func (service *Service) CreateNew(ctx context.Context, user users.User) (int64, 
 
 		id, err := service.repository.Create(ctx, users.User{Login: user.Login, Password: hashedPassword})
 		if err != nil {
-			if strings.Index(err.Error(), pgerrcode.UniqueViolation) != -1 {
+			if strings.Contains(err.Error(), pgerrcode.UniqueViolation) {
 				return 0, ErrConflict
 			}
 
