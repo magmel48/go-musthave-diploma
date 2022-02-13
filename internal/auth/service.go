@@ -12,7 +12,7 @@ import (
 //go:generate mockery --name=Auth
 type Auth interface {
 	CreateNew(ctx context.Context, user users.User) (int64, error)
-	CheckUser(ctx context.Context, login string, password string) error
+	CheckUser(ctx context.Context, user users.User) (int64, error)
 }
 
 var ErrConflict = errors.New("conflict")
@@ -53,17 +53,17 @@ func (service *Service) CreateNew(ctx context.Context, user users.User) (int64, 
 	return 0, ErrConflict
 }
 
-func (service *Service) CheckUser(ctx context.Context, login string, password string) error {
-	user, err := service.repository.Find(ctx, login)
+func (service *Service) CheckUser(ctx context.Context, user users.User) (int64, error) {
+	u, err := service.repository.Find(ctx, user.Login)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	if checkPasswordHash(password, user.Password) {
-		return nil
+	if checkPasswordHash(user.Password, u.Password) {
+		return u.ID, nil
 	}
 
-	return ErrInvalidCredentials
+	return 0, ErrInvalidCredentials
 }
 
 func hashPassword(password string) (string, error) {

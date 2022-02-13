@@ -50,7 +50,7 @@ func (app *App) Handler() *gin.Engine {
 	r.Use(sessions.Sessions("session", store))
 
 	r.POST("/api/user/register", app.register)
-	r.POST("/api/user/login", login)
+	r.POST("/api/user/login", app.login)
 	r.POST("/api/user/orders", calculateOrder)
 	r.GET("/api/user/orders", orderList)
 	r.GET("/api/user/balance", getBalance)
