@@ -3,13 +3,15 @@ package auth
 import (
 	"context"
 	"errors"
+	"github.com/jackc/pgerrcode"
 	"github.com/magmel48/go-musthave-diploma/internal/users"
 	"golang.org/x/crypto/bcrypt"
+	"strings"
 )
 
 //go:generate mockery --name=Auth
 type Auth interface {
-	CreateNew(ctx context.Context, login string, password string) (int64, error)
+	CreateNew(ctx context.Context, user users.User) (int64, error)
 	CheckUser(ctx context.Context, login string, password string) error
 }
 
@@ -24,20 +26,24 @@ func NewService(repository users.Repository) *Service {
 	return &Service{repository: repository}
 }
 
-func (service *Service) CreateNew(ctx context.Context, login string, password string) (int64, error) {
-	user, err := service.repository.Find(ctx, login)
+func (service *Service) CreateNew(ctx context.Context, user users.User) (int64, error) {
+	u, err := service.repository.Find(ctx, user.Login)
 	if err != nil {
 		return 0, err
 	}
 
-	if user == nil {
-		hashedPassword, err := hashPassword(password)
+	if u == nil {
+		hashedPassword, err := hashPassword(user.Password)
 		if err != nil {
 			return 0, err
 		}
 
-		id, err := service.repository.Create(ctx, users.User{Login: login, Password: hashedPassword})
+		id, err := service.repository.Create(ctx, users.User{Login: user.Login, Password: hashedPassword})
 		if err != nil {
+			if strings.Index(err.Error(), pgerrcode.UniqueViolation) != -1 {
+				return 0, ErrConflict
+			}
+
 			return 0, err
 		}
 

@@ -8,6 +8,7 @@ import (
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	_ "github.com/jackc/pgx/v4/stdlib"
+	"github.com/magmel48/go-musthave-diploma/internal/auth"
 	"github.com/magmel48/go-musthave-diploma/internal/config"
 	"github.com/magmel48/go-musthave-diploma/internal/users"
 	"time"
@@ -17,6 +18,7 @@ type App struct {
 	Context context.Context
 	db      *sql.DB
 	users   users.Repository
+	auth    auth.Auth
 }
 
 func (app *App) Init() error {
@@ -36,6 +38,7 @@ func (app *App) Init() error {
 
 	// TODO create repositories with passing connection into all of them
 	app.users = users.NewUserRepository(app.db)
+	app.auth = auth.NewService(app.users)
 
 	return nil
 }

@@ -43,6 +43,11 @@ func (repository *UserRepository) Find(ctx context.Context, login string) (*User
 		return user, nil
 	}
 
+	err = rows.Err()
+	if err != nil {
+		return nil, err
+	}
+
 	return nil, nil
 }
 

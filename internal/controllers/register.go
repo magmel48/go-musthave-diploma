@@ -2,9 +2,13 @@ package controllers
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/magmel48/go-musthave-diploma/internal/auth"
+	"github.com/magmel48/go-musthave-diploma/internal/logger"
 	"github.com/magmel48/go-musthave-diploma/internal/users"
+	"go.uber.org/zap"
 	"net/http"
 )
 
@@ -12,6 +16,8 @@ func (app *App) register(context *gin.Context) {
 	var user users.User
 	err := json.NewDecoder(context.Request.Body).Decode(&user)
 	if err != nil {
+		logger.Error("/register: unmarshal json payload error", zap.Error(err))
+
 		context.Status(http.StatusBadRequest)
 		return
 	}
@@ -21,9 +27,16 @@ func (app *App) register(context *gin.Context) {
 		return
 	}
 
-	id, err := app.users.Create(context, user)
+	id, err := app.auth.CreateNew(context, user)
 	if err != nil {
-		context.Status(http.StatusBadRequest)
+		logger.Error("/register: user create error", zap.Error(err))
+
+		if errors.Is(err, auth.ErrConflict) {
+			context.Status(http.StatusConflict)
+		} else {
+			context.Status(http.StatusBadRequest)
+		}
+
 		return
 	}
 
@@ -32,6 +45,8 @@ func (app *App) register(context *gin.Context) {
 	err = session.Save()
 
 	if err != nil {
+		logger.Error("/register: saving session error")
+
 		context.Status(http.StatusInternalServerError)
 		return
 	}
