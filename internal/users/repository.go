@@ -47,10 +47,15 @@ func (repository *UserRepository) Find(ctx context.Context, login string) (*User
 }
 
 func (repository *UserRepository) Create(ctx context.Context, user User) (int64, error) {
-	result, err := repository.db.ExecContext(
-		ctx, `INSERT INTO "users" (login, password) VALUES ($1, $2) RETURNING "id"`, user.Login, user.Password)
+	var userID int64
 
-	id, err := result.LastInsertId()
+	if err := repository.db.QueryRowContext(
+		ctx,
+		`INSERT INTO "users" (login, password) VALUES ($1, $2) RETURNING "id"`,
+		user.Login,
+		user.Password).Scan(&userID); err != nil {
+		return 0, err
+	}
 
-	return id, err
+	return userID, nil
 }
