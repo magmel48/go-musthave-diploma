@@ -1,4 +1,4 @@
-package routes
+package controllers
 
 import (
 	"database/sql"
@@ -7,11 +7,13 @@ import (
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"github.com/magmel48/go-musthave-diploma/internal/config"
+	"github.com/magmel48/go-musthave-diploma/internal/users"
 	"time"
 )
 
 type App struct {
-	db *sql.DB
+	db    *sql.DB
+	users users.Repository
 }
 
 func (app *App) Init() error {
@@ -30,6 +32,8 @@ func (app *App) Init() error {
 	app.db.SetConnMaxIdleTime(10 * time.Second)
 
 	// TODO create repositories with passing connection into all of them
+	app.users = users.NewUserRepository(app.db)
+
 	return nil
 }
 
@@ -39,7 +43,7 @@ func (app *App) Handler() *gin.Engine {
 	store := cookie.NewStore([]byte(config.SessionsSecret))
 	r.Use(sessions.Sessions("session", store))
 
-	r.POST("/api/user/register", register)
+	r.POST("/api/user/register", app.register)
 	r.POST("/api/user/login", login)
 	r.POST("/api/user/orders", calculateOrder)
 	r.GET("/api/user/orders", orderList)

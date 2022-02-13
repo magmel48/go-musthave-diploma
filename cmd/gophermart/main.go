@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"github.com/magmel48/go-musthave-diploma/internal/config"
+	"github.com/magmel48/go-musthave-diploma/internal/controllers"
 	"github.com/magmel48/go-musthave-diploma/internal/logger"
-	"github.com/magmel48/go-musthave-diploma/internal/routes"
 	"golang.org/x/sync/errgroup"
 	"log"
 	"net"
@@ -27,7 +27,7 @@ func main() {
 	defer cancel()
 
 	// FIXME think about passing context into the app
-	app := routes.App{}
+	app := controllers.App{}
 	err := app.Init()
 	if err != nil {
 		panic(err)

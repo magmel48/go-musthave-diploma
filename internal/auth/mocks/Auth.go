@@ -13,8 +13,8 @@ type Auth struct {
 	mock.Mock
 }
 
-// Login provides a mock function with given fields: ctx, login, password
-func (_m *Auth) Login(ctx context.Context, login string, password string) error {
+// CheckUser provides a mock function with given fields: ctx, login, password
+func (_m *Auth) CheckUser(ctx context.Context, login string, password string) error {
 	ret := _m.Called(ctx, login, password)
 
 	var r0 error
@@ -27,8 +27,8 @@ func (_m *Auth) Login(ctx context.Context, login string, password string) error 
 	return r0
 }
 
-// Register provides a mock function with given fields: ctx, login, password
-func (_m *Auth) Register(ctx context.Context, login string, password string) (int64, error) {
+// CreateNew provides a mock function with given fields: ctx, login, password
+func (_m *Auth) CreateNew(ctx context.Context, login string, password string) (int64, error) {
 	ret := _m.Called(ctx, login, password)
 
 	var r0 int64
