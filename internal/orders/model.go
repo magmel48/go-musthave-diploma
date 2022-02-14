@@ -1,12 +1,16 @@
 package orders
 
-import "time"
+import (
+	"time"
+)
+
+type OrderStatus string
 
 // Order represents order transfer object.
 type Order struct {
 	ID         int64
 	Number     string
-	Status     string
+	Status     OrderStatus
 	UserID     int64
 	UploadedAt time.Time
 }

@@ -3,25 +3,31 @@ package users
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"github.com/jackc/pgerrcode"
 	"github.com/magmel48/go-musthave-diploma/internal/logger"
+	"strings"
 )
 
 //go:generate mockery --name=Repository
 type Repository interface {
-	Find(ctx context.Context, login string) (*User, error)
-	Create(ctx context.Context, user User) (int64, error)
+	Find(ctx context.Context, user User) (*User, error)
+	Create(ctx context.Context, user User) (*User, error)
 }
 
-type UserRepository struct {
+var ErrConflict = errors.New("conflict")
+
+type PostgreSQLRepository struct {
 	db *sql.DB
 }
 
-func NewUserRepository(db *sql.DB) *UserRepository {
-	return &UserRepository{db: db}
+func NewRepository(db *sql.DB) *PostgreSQLRepository {
+	return &PostgreSQLRepository{db: db}
 }
 
-func (repository *UserRepository) Find(ctx context.Context, login string) (*User, error) {
-	rows, err := repository.db.QueryContext(ctx, `SELECT "id", "login", "password" FROM "users"`)
+func (repository *PostgreSQLRepository) Find(ctx context.Context, user User) (*User, error) {
+	rows, err := repository.db.QueryContext(
+		ctx, `SELECT "id", "login", "password" FROM "users" WHERE "login" = $1`, user.Login)
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +42,7 @@ func (repository *UserRepository) Find(ctx context.Context, login string) (*User
 	if rows.Next() {
 		user := new(User)
 
-		if err = rows.Scan(user.ID, user.Login, user.Password); err != nil {
+		if err = rows.Scan(&user.ID, &user.Login, &user.Password); err != nil {
 			return nil, err
 		}
 
@@ -51,16 +57,20 @@ func (repository *UserRepository) Find(ctx context.Context, login string) (*User
 	return nil, nil
 }
 
-func (repository *UserRepository) Create(ctx context.Context, user User) (int64, error) {
-	var userID int64
+func (repository *PostgreSQLRepository) Create(ctx context.Context, user User) (*User, error) {
+	var result User
 
 	if err := repository.db.QueryRowContext(
 		ctx,
-		`INSERT INTO "users" (login, password) VALUES ($1, $2) RETURNING "id"`,
+		`INSERT INTO "users" ("login", "password") VALUES ($1, $2) RETURNING "id", "login", "password"`,
 		user.Login,
-		user.Password).Scan(&userID); err != nil {
-		return 0, err
+		user.Password).Scan(&result.ID, &result.Login, &result.Password); err != nil {
+		if strings.Contains(err.Error(), pgerrcode.UniqueViolation) {
+			return nil, ErrConflict
+		}
+
+		return &result, err
 	}
 
-	return userID, nil
+	return &result, nil
 }

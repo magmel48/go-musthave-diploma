@@ -5,6 +5,7 @@ package mocks
 import (
 	context "context"
 
+	users "github.com/magmel48/go-musthave-diploma/internal/users"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -13,34 +14,41 @@ type Auth struct {
 	mock.Mock
 }
 
-// CheckUser provides a mock function with given fields: ctx, login, password
-func (_m *Auth) CheckUser(ctx context.Context, login string, password string) error {
-	ret := _m.Called(ctx, login, password)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) error); ok {
-		r0 = rf(ctx, login, password)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// CreateNew provides a mock function with given fields: ctx, login, password
-func (_m *Auth) CreateNew(ctx context.Context, login string, password string) (int64, error) {
-	ret := _m.Called(ctx, login, password)
+// CheckUser provides a mock function with given fields: ctx, user
+func (_m *Auth) CheckUser(ctx context.Context, user users.User) (int64, error) {
+	ret := _m.Called(ctx, user)
 
 	var r0 int64
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) int64); ok {
-		r0 = rf(ctx, login, password)
+	if rf, ok := ret.Get(0).(func(context.Context, users.User) int64); ok {
+		r0 = rf(ctx, user)
 	} else {
 		r0 = ret.Get(0).(int64)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
-		r1 = rf(ctx, login, password)
+	if rf, ok := ret.Get(1).(func(context.Context, users.User) error); ok {
+		r1 = rf(ctx, user)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// CreateNew provides a mock function with given fields: ctx, user
+func (_m *Auth) CreateNew(ctx context.Context, user users.User) (int64, error) {
+	ret := _m.Called(ctx, user)
+
+	var r0 int64
+	if rf, ok := ret.Get(0).(func(context.Context, users.User) int64); ok {
+		r0 = rf(ctx, user)
+	} else {
+		r0 = ret.Get(0).(int64)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, users.User) error); ok {
+		r1 = rf(ctx, user)
 	} else {
 		r1 = ret.Error(1)
 	}

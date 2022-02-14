@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS orders (
     user_id BIGINT NOT NULL,
     uploaded_at TIMESTAMP NOT NULL DEFAULT NOW(),
     PRIMARY KEY (id),
+    UNIQUE(number),
     CONSTRAINT fk_user
         FOREIGN KEY(user_id)
             REFERENCES users(id)

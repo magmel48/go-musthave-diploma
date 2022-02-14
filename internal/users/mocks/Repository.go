@@ -35,13 +35,13 @@ func (_m *Repository) Create(ctx context.Context, user users.User) (int64, error
 	return r0, r1
 }
 
-// Find provides a mock function with given fields: ctx, login
-func (_m *Repository) Find(ctx context.Context, login string) (*users.User, error) {
-	ret := _m.Called(ctx, login)
+// Find provides a mock function with given fields: ctx, user
+func (_m *Repository) Find(ctx context.Context, user users.User) (*users.User, error) {
+	ret := _m.Called(ctx, user)
 
 	var r0 *users.User
-	if rf, ok := ret.Get(0).(func(context.Context, string) *users.User); ok {
-		r0 = rf(ctx, login)
+	if rf, ok := ret.Get(0).(func(context.Context, users.User) *users.User); ok {
+		r0 = rf(ctx, user)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*users.User)
@@ -49,8 +49,8 @@ func (_m *Repository) Find(ctx context.Context, login string) (*users.User, erro
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = rf(ctx, login)
+	if rf, ok := ret.Get(1).(func(context.Context, users.User) error); ok {
+		r1 = rf(ctx, user)
 	} else {
 		r1 = ret.Error(1)
 	}
