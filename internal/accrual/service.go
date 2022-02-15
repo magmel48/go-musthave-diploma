@@ -2,15 +2,15 @@ package accrual
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"github.com/magmel48/go-musthave-diploma/internal/orders"
 	"net/http"
 )
 
 // OrderResponse represents response from accrual service about order status and reward.
 type OrderResponse struct {
-	Order   string  `json:"order"`
-	Status  string  `json:"status"`
-	Accrual float64 `json:"accrual"`
+	Order   string             `json:"order"`
+	Status  orders.OrderStatus `json:"status"`
+	Accrual float64            `json:"accrual"`
 }
 
 //go:generate mockery --name=Service
@@ -40,13 +40,8 @@ func (service *ExternalService) GetOrder(order string) (*OrderResponse, error) {
 		}
 	}()
 
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
 	var response OrderResponse
-	err = json.Unmarshal(body, &response)
+	err = json.NewDecoder(resp.Body).Decode(&response)
 	if err != nil {
 		return nil, err
 	}

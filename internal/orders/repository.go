@@ -12,6 +12,7 @@ type Repository interface {
 	Create(ctx context.Context, orderNumber string, userID int64) (*Order, error)
 	FindUserOrder(ctx context.Context, orderNumber string, userID int64) (*Order, error)
 	FindUserOrders(ctx context.Context, userID int64) ([]Order, error)
+	FindUnprocessedOrders(ctx context.Context) ([]Order, error)
 }
 
 var ErrConflict = errors.New("conflict")
@@ -21,8 +22,8 @@ type PostgreSQLRepository struct {
 	db *sql.DB
 }
 
-// NewRepository creates new PostgreSQLRepository.
-func NewRepository(db *sql.DB) *PostgreSQLRepository {
+// NewPostgreSQLRepository creates new PostgreSQLRepository.
+func NewPostgreSQLRepository(db *sql.DB) *PostgreSQLRepository {
 	return &PostgreSQLRepository{db: db}
 }
 
@@ -58,7 +59,8 @@ func (repository *PostgreSQLRepository) FindUserOrder(ctx context.Context, order
 // FindUserOrders finds all orders belong to specified user.
 func (repository *PostgreSQLRepository) FindUserOrders(ctx context.Context, userID int64) ([]Order, error) {
 	rows, err := repository.db.QueryContext(
-		ctx, `SELECT "number", "status", "accrual", "uploaded_at" WHERE "user_id" = $1`, userID)
+		ctx,
+		`SELECT "number", "status", "accrual", "uploaded_at" FROM "orders" WHERE "user_id" = $1 ORDER BY "uloaded_at" ASC`, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -73,8 +75,33 @@ func (repository *PostgreSQLRepository) FindUserOrders(ctx context.Context, user
 	orders := make([]Order, 0)
 	for rows.Next() {
 		var order Order
-		err := rows.Scan(&order.Number, &order.Status, &order.Accrual, &order.UploadedAt)
-		if err != nil {
+		if err = rows.Scan(&order.Number, &order.Status, &order.Accrual, &order.UploadedAt); err != nil {
+			return orders, nil
+		}
+
+		orders = append(orders, order)
+	}
+
+	err = rows.Err()
+	if err != nil {
+		return nil, err
+	}
+
+	return orders, nil
+}
+
+// FindUnprocessedOrders finds all orders with non-final status.
+func (repository *PostgreSQLRepository) FindUnprocessedOrders(ctx context.Context) ([]Order, error) {
+	rows, err := repository.db.QueryContext(
+		ctx, `SELECT "id", "number" FROM "orders" WHERE "status" IN ($1)`, UnprocessedStatuses)
+	if err != nil {
+		return nil, err
+	}
+
+	orders := make([]Order, 0)
+	for rows.Next() {
+		var order Order
+		if err = rows.Scan(&order.ID, &order.Number); err != nil {
 			return orders, nil
 		}
 

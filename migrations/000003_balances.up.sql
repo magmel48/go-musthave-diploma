@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS balances (
     withdrawn NUMERIC NOT NULL DEFAULT 0 CHECK (withdrawn >= 0),
     user_id BIGINT NOT NULL,
     PRIMARY KEY (id),
+    UNIQUE(user_id),
     CONSTRAINT fk_user
         FOREIGN KEY(user_id)
             REFERENCES users(id)

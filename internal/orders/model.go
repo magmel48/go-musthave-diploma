@@ -6,6 +6,8 @@ import (
 
 type OrderStatus string
 
+var UnprocessedStatuses = []OrderStatus{"NEW", "PROCESSING"}
+
 // Order represents order transfer object.
 type Order struct {
 	ID         int64

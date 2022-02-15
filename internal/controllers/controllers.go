@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/jackc/pgx/v4/stdlib"
 	"github.com/magmel48/go-musthave-diploma/internal/auth"
+	"github.com/magmel48/go-musthave-diploma/internal/balances"
 	"github.com/magmel48/go-musthave-diploma/internal/config"
 	"github.com/magmel48/go-musthave-diploma/internal/orders"
 	"github.com/magmel48/go-musthave-diploma/internal/users"
@@ -16,11 +17,12 @@ import (
 )
 
 type App struct {
-	Context context.Context
-	db      *sql.DB
-	users   users.Repository
-	orders  orders.Repository
-	auth    auth.Auth
+	Context  context.Context
+	db       *sql.DB
+	auth     auth.Auth
+	users    users.Repository
+	orders   orders.Repository
+	balances balances.Repository
 }
 
 func (app *App) Init() error {
@@ -38,10 +40,11 @@ func (app *App) Init() error {
 	app.db.SetMaxIdleConns(30)
 	app.db.SetConnMaxIdleTime(10 * time.Second)
 
-	app.users = users.NewRepository(app.db)
+	app.users = users.NewPostgreSQLRepository(app.db)
 	app.auth = auth.NewService(app.users)
 
-	app.orders = orders.NewRepository(app.db)
+	app.orders = orders.NewPostgreSQLRepository(app.db)
+	app.balances = balances.NewPostgreSQLRepository(app.db)
 
 	return nil
 }
