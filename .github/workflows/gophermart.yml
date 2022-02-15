@@ -7,6 +7,7 @@ on:
     branches:
       - main
       - master
+      - diploma
 
 jobs:
 
@@ -48,6 +49,12 @@ jobs:
         run: |
           (cd cmd/gophermart && go build -o gophermart)
           (cd cmd/accrual && chmod +x accrual_linux_amd64)
+
+      - name: Install goose
+        run: go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+
+      - name: Migrations
+        run: migrate -path=./migrations -database "postgres://postgres:postgres@postgres:5432/praktikum?sslmode=disable" up
 
       - name: Test
         run: |
