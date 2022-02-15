@@ -4,13 +4,12 @@ import (
 	"errors"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/joeljunstrom/go-luhn"
 	"github.com/magmel48/go-musthave-diploma/internal/logger"
 	"github.com/magmel48/go-musthave-diploma/internal/orders"
-	"github.com/theplant/luhn"
 	"go.uber.org/zap"
 	"io/ioutil"
 	"net/http"
-	"strconv"
 )
 
 func (app *App) calculateOrder(context *gin.Context) {
@@ -34,14 +33,13 @@ func (app *App) calculateOrder(context *gin.Context) {
 		return
 	}
 
-	// TODO change luhn to own implementation
-	id, err := strconv.Atoi(string(payload))
-	if err != nil || !luhn.Valid(id) {
+	id := string(payload)
+	if !luhn.Valid(id) {
 		context.Status(http.StatusUnprocessableEntity)
 		return
 	}
 
-	order, err := app.orders.Create(context, orders.Order{UserID: userID, Number: strconv.Itoa(id)})
+	order, err := app.orders.Create(context, orders.Order{UserID: userID, Number: id})
 	if err != nil {
 		if errors.Is(err, orders.ErrConflict) {
 			context.JSON(http.StatusConflict, gin.H{"error": "order already exists"})
