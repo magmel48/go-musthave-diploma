@@ -1,6 +1,7 @@
 package accrual
 
 import (
+	"context"
 	"encoding/json"
 	"github.com/magmel48/go-musthave-diploma/internal/orders"
 	"net/http"
@@ -15,7 +16,7 @@ type OrderResponse struct {
 
 //go:generate mockery --name=Service
 type Service interface {
-	GetOrder(order string) (*OrderResponse, error)
+	GetOrder(ctx context.Context, orderNumber string) (*OrderResponse, error)
 }
 
 type ExternalService struct {
@@ -26,9 +27,8 @@ func NewExternalService(baseURL string) *ExternalService {
 	return &ExternalService{baseURL: baseURL}
 }
 
-func (service *ExternalService) GetOrder(order string) (*OrderResponse, error) {
-	client := http.Client{}
-	resp, err := client.Get(service.baseURL + "/api/orders/" + order)
+func (service *ExternalService) GetOrder(ctx context.Context, orderNumber string) (*OrderResponse, error) {
+	resp, err := http.NewRequestWithContext(ctx, http.MethodGet, service.baseURL+"/api/orders/"+orderNumber, nil)
 	if err != nil {
 		return nil, err
 	}

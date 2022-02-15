@@ -7,17 +7,19 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
+	"github.com/go-co-op/gocron"
 	_ "github.com/jackc/pgx/v4/stdlib"
 	"github.com/magmel48/go-musthave-diploma/internal/auth"
 	"github.com/magmel48/go-musthave-diploma/internal/balances"
 	"github.com/magmel48/go-musthave-diploma/internal/config"
+	"github.com/magmel48/go-musthave-diploma/internal/daemons"
 	"github.com/magmel48/go-musthave-diploma/internal/orders"
 	"github.com/magmel48/go-musthave-diploma/internal/users"
 	"time"
 )
 
 type App struct {
-	Context  context.Context
+	ctx      context.Context
 	db       *sql.DB
 	auth     auth.Auth
 	users    users.Repository
@@ -25,7 +27,7 @@ type App struct {
 	balances balances.Repository
 }
 
-func (app *App) Init() error {
+func (app *App) Init(ctx context.Context) error {
 	if config.DatabaseDSN == "" {
 		return errors.New("no db connection details provided")
 	}
@@ -45,6 +47,14 @@ func (app *App) Init() error {
 
 	app.orders = orders.NewPostgreSQLRepository(app.db)
 	app.balances = balances.NewPostgreSQLRepository(app.db)
+
+	s := gocron.NewScheduler(time.UTC)
+	_, err = s.Every(5).Seconds().Do(func() {
+		daemons.NewExternalAccrualJob(ctx, app.db)
+	})
+	if err != nil {
+		panic(err)
+	}
 
 	return nil
 }

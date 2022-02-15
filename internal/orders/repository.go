@@ -13,6 +13,7 @@ type Repository interface {
 	FindUserOrder(ctx context.Context, orderNumber string, userID int64) (*Order, error)
 	FindUserOrders(ctx context.Context, userID int64) ([]Order, error)
 	FindUnprocessedOrders(ctx context.Context) ([]Order, error)
+	Update(ctx context.Context, order Order) error
 }
 
 var ErrConflict = errors.New("conflict")
@@ -97,7 +98,7 @@ func (repository *PostgreSQLRepository) FindUserOrders(ctx context.Context, user
 // FindUnprocessedOrders finds all orders with non-final status.
 func (repository *PostgreSQLRepository) FindUnprocessedOrders(ctx context.Context) ([]Order, error) {
 	rows, err := repository.db.QueryContext(
-		ctx, `SELECT "id", "number" FROM "orders" WHERE "status" IN ($1)`, UnprocessedStatuses)
+		ctx, `SELECT "id", "number", "status", "user_id" FROM "orders" WHERE "status" IN ($1)`, UnprocessedStatuses)
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +106,7 @@ func (repository *PostgreSQLRepository) FindUnprocessedOrders(ctx context.Contex
 	orders := make([]Order, 0)
 	for rows.Next() {
 		var order Order
-		if err = rows.Scan(&order.ID, &order.Number); err != nil {
+		if err = rows.Scan(&order.ID, &order.Number, &order.Status, &order.UserID); err != nil {
 			return orders, nil
 		}
 
@@ -118,4 +119,12 @@ func (repository *PostgreSQLRepository) FindUnprocessedOrders(ctx context.Contex
 	}
 
 	return orders, nil
+}
+
+func (repository *PostgreSQLRepository) Update(ctx context.Context, order Order) error {
+	_, err := repository.db.ExecContext(
+		ctx,
+		`UPDATE "orders" SET "status" = $1, "accrual" = $2 WHERE "id" = $2`, order.Status, order.Accrual, order.ID)
+
+	return err
 }

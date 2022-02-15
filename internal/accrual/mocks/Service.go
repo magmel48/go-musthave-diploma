@@ -3,7 +3,10 @@
 package mocks
 
 import (
+	context "context"
+
 	accrual "github.com/magmel48/go-musthave-diploma/internal/accrual"
+
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -12,13 +15,13 @@ type Service struct {
 	mock.Mock
 }
 
-// GetOrder provides a mock function with given fields: order
-func (_m *Service) GetOrder(order string) (*accrual.OrderResponse, error) {
-	ret := _m.Called(order)
+// GetOrder provides a mock function with given fields: ctx, orderNumber
+func (_m *Service) GetOrder(ctx context.Context, orderNumber string) (*accrual.OrderResponse, error) {
+	ret := _m.Called(ctx, orderNumber)
 
 	var r0 *accrual.OrderResponse
-	if rf, ok := ret.Get(0).(func(string) *accrual.OrderResponse); ok {
-		r0 = rf(order)
+	if rf, ok := ret.Get(0).(func(context.Context, string) *accrual.OrderResponse); ok {
+		r0 = rf(ctx, orderNumber)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*accrual.OrderResponse)
@@ -26,8 +29,8 @@ func (_m *Service) GetOrder(order string) (*accrual.OrderResponse, error) {
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(order)
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, orderNumber)
 	} else {
 		r1 = ret.Error(1)
 	}

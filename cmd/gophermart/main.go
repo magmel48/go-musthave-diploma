@@ -21,8 +21,8 @@ func main() {
 	defer cancel()
 
 	eg, ctx := errgroup.WithContext(ctx)
-	app := controllers.App{Context: ctx}
-	err := app.Init()
+	app := controllers.App{}
+	err := app.Init(ctx)
 	if err != nil {
 		panic(err)
 	}

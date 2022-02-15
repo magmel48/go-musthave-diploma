@@ -8,6 +8,7 @@ import (
 //go:generate mockery --name=Repository
 type Repository interface {
 	FindByUser(ctx context.Context, userID int64) (*Balance, error)
+	Change(ctx context.Context, userID int64, amount float64) error
 }
 
 type PostgreSQLRepository struct {
@@ -23,7 +24,7 @@ func (repository *PostgreSQLRepository) FindByUser(ctx context.Context, userID i
 
 	if err := repository.db.QueryRowContext(
 		ctx,
-		`INSERT INTO "balances" ("user_id", "current", "withdrawn") VALUES ($1, 0, 0)
+		`INSERT INTO "balances" ("user_id", "current") VALUES ($1, 0)
 			ON CONFLICT ("user_id") DO UPDATE SET "user_id" = $1 RETURNING "current", "withdrawn"`,
 		userID).Scan(
 		&result.Current, &result.Withdrawn); err != nil {
@@ -31,4 +32,14 @@ func (repository *PostgreSQLRepository) FindByUser(ctx context.Context, userID i
 	}
 
 	return &result, nil
+}
+
+func (repository *PostgreSQLRepository) Change(ctx context.Context, userID int64, amount float64) error {
+	_, err := repository.db.ExecContext(
+		ctx,
+		`INSERT INTO "balances" ("user_id", "current") VALUES ($1, $2)
+			ON CONFLICT ("user_id") DO UPDATE SET "current" = "balances"."current" + $2`,
+		userID, amount)
+
+	return err
 }
