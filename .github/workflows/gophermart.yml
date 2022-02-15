@@ -50,7 +50,7 @@ jobs:
           (cd cmd/gophermart && go build -o gophermart)
           (cd cmd/accrual && chmod +x accrual_linux_amd64)
 
-      - name: Install goose
+      - name: Install migrate-cli
         run: go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 
       - name: Migrations

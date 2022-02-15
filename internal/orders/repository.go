@@ -50,6 +50,10 @@ func (repository *PostgreSQLRepository) FindUserOrder(ctx context.Context, order
 		ctx, `SELECT "id" FROM "orders" WHERE "number" = $1 AND "user_id" = $2`,
 		orderNumber, userID).Scan(
 		&result.ID); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+
 		return nil, err
 	}
 

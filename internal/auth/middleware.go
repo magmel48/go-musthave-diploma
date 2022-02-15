@@ -13,9 +13,9 @@ func Middleware() gin.HandlerFunc {
 
 		userID := int64(0)
 
-		switch sessionUserID.(type) {
+		switch id := sessionUserID.(type) {
 		case int64:
-			userID = sessionUserID.(int64)
+			userID = id
 		default:
 			context.AbortWithStatus(http.StatusUnauthorized)
 			return
