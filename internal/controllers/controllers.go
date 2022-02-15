@@ -48,13 +48,15 @@ func (app *App) Init(ctx context.Context) error {
 	app.orders = orders.NewPostgreSQLRepository(app.db)
 	app.balances = balances.NewPostgreSQLRepository(app.db)
 
+	// run daemon for order updates checking
+	daemon := daemons.NewExternalAccrualJob(ctx, app.db)
 	s := gocron.NewScheduler(time.UTC)
-	_, err = s.Every(5).Seconds().Do(func() {
-		daemons.NewExternalAccrualJob(ctx, app.db)
-	})
+	_, err = s.Every(5).Seconds().Do(daemon.Start)
 	if err != nil {
 		panic(err)
 	}
+
+	s.StartAsync()
 
 	return nil
 }

@@ -34,19 +34,19 @@ func NewExternalAccrualJob(ctx context.Context, db *sql.DB) *ExternalAccrualJob 
 func (job *ExternalAccrualJob) Start() {
 	records, err := job.orders.FindUnprocessedOrders(job.ctx)
 	if err != nil {
-		logger.Error(err.Error())
+		logger.Error("orders db fetch error", zap.Error(err))
 		return
 	}
 
 	for _, order := range records {
 		response, err := job.accrual.GetOrder(job.ctx, order.Number)
 		if err != nil {
-			logger.Error(err.Error())
+			logger.Error("accrual service call error", zap.Error(err))
 			continue
 		}
 
 		if order.Status != response.Status {
-			logger.Info("status updated", zap.Int64("id", order.ID), zap.String("status", string(response.Status)))
+			logger.Info("status updated", zap.Int64("id", order.ID), zap.String("status", response.Status))
 
 			if err := job.orders.Update(job.ctx, orders.Order{
 				ID:      order.ID,

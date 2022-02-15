@@ -3,15 +3,16 @@ package accrual
 import (
 	"context"
 	"encoding/json"
-	"github.com/magmel48/go-musthave-diploma/internal/orders"
+	"github.com/magmel48/go-musthave-diploma/internal/logger"
+	"go.uber.org/zap"
 	"net/http"
 )
 
 // OrderResponse represents response from accrual service about order status and reward.
 type OrderResponse struct {
-	Order   string             `json:"order"`
-	Status  orders.OrderStatus `json:"status"`
-	Accrual float64            `json:"accrual"`
+	Order   string  `json:"order"`
+	Status  string  `json:"status"`
+	Accrual float64 `json:"accrual"`
 }
 
 //go:generate mockery --name=Service
@@ -28,7 +29,13 @@ func NewExternalService(baseURL string) *ExternalService {
 }
 
 func (service *ExternalService) GetOrder(ctx context.Context, orderNumber string) (*OrderResponse, error) {
-	resp, err := http.NewRequestWithContext(ctx, http.MethodGet, service.baseURL+"/api/orders/"+orderNumber, nil)
+	client := http.Client{}
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, service.baseURL+"/api/orders/"+orderNumber, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +43,7 @@ func (service *ExternalService) GetOrder(ctx context.Context, orderNumber string
 	defer func() {
 		err := resp.Body.Close()
 		if err != nil {
-			panic(err)
+			logger.Error("get order accrual close body error", zap.Error(err))
 		}
 	}()
 

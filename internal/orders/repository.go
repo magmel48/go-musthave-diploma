@@ -98,7 +98,7 @@ func (repository *PostgreSQLRepository) FindUserOrders(ctx context.Context, user
 // FindUnprocessedOrders finds all orders with non-final status.
 func (repository *PostgreSQLRepository) FindUnprocessedOrders(ctx context.Context) ([]Order, error) {
 	rows, err := repository.db.QueryContext(
-		ctx, `SELECT "id", "number", "status", "user_id" FROM "orders" WHERE "status" IN ($1)`, UnprocessedStatuses)
+		ctx, `SELECT "id", "number", "status", "user_id" FROM "orders" WHERE "status" = ANY($1)`, UnprocessedStatuses)
 	if err != nil {
 		return nil, err
 	}
