@@ -17,3 +17,4 @@ docker-compose --env-file .env up
 2. Fix known bugs.
 3. Find a workaround for `Sync()` issue with zap logger (`inappropriate ioctl for device`).
 4. Create a helper for error serialization instead of using raw `gin.H`.
+5. Update schema.

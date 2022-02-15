@@ -42,7 +42,7 @@ func (app *App) calculateOrder(context *gin.Context) {
 		return
 	}
 
-	order, err = app.orders.Create(context, orders.Order{UserID: userID, Number: id})
+	order, err = app.orders.Create(context, id, userID)
 	if err != nil {
 		if errors.Is(err, orders.ErrConflict) {
 			// 409 - spec: order number already loaded by another user

@@ -39,6 +39,7 @@ func (app *App) register(context *gin.Context) {
 		return
 	}
 
+	// TODO find a way to remove from here
 	session := sessions.Default(context)
 	session.Set(auth.UserIDKey, u.ID)
 	err = session.Save()
