@@ -35,7 +35,7 @@ func (app *App) login(context *gin.Context) {
 	}
 
 	session := sessions.Default(context)
-	session.Set(UserIDKey, user.ID)
+	session.Set(auth.UserIDKey, user.ID)
 	err = session.Save()
 
 	if err != nil {

@@ -2,9 +2,9 @@ package controllers
 
 import (
 	"errors"
-	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/joeljunstrom/go-luhn"
+	"github.com/magmel48/go-musthave-diploma/internal/auth"
 	"github.com/magmel48/go-musthave-diploma/internal/logger"
 	"github.com/magmel48/go-musthave-diploma/internal/orders"
 	"go.uber.org/zap"
@@ -13,18 +13,7 @@ import (
 )
 
 func (app *App) calculateOrder(context *gin.Context) {
-	session := sessions.Default(context)
-	sessionUserID := session.Get(UserIDKey)
-
-	userID := int64(0)
-
-	switch sessionUserID.(type) {
-	case int64:
-		userID = sessionUserID.(int64)
-	default:
-		context.Status(http.StatusUnauthorized)
-		return
-	}
+	userID := context.MustGet(auth.UserIDKey).(int64)
 
 	payload, err := ioutil.ReadAll(context.Request.Body)
 	if err != nil {
@@ -35,13 +24,28 @@ func (app *App) calculateOrder(context *gin.Context) {
 
 	id := string(payload)
 	if !luhn.Valid(id) {
+		// 422 - spec: invalid order number
 		context.Status(http.StatusUnprocessableEntity)
 		return
 	}
 
-	order, err := app.orders.Create(context, orders.Order{UserID: userID, Number: id})
+	order, err := app.orders.FindUserOrder(context, id, userID)
+	if err != nil {
+		logger.Error("POST /orders: find order error", zap.Error(err))
+		context.Status(http.StatusInternalServerError)
+		return
+	}
+
+	// 200 - spec: order number already loaded by this user
+	if order != nil {
+		context.JSON(http.StatusOK, gin.H{"id": order.ID})
+		return
+	}
+
+	order, err = app.orders.Create(context, orders.Order{UserID: userID, Number: id})
 	if err != nil {
 		if errors.Is(err, orders.ErrConflict) {
+			// 409 - spec: order number already loaded by another user
 			context.JSON(http.StatusConflict, gin.H{"error": "order already exists"})
 		} else {
 			context.Status(http.StatusInternalServerError)
@@ -50,5 +54,6 @@ func (app *App) calculateOrder(context *gin.Context) {
 		return
 	}
 
+	// 202 - spec: new order number accepted
 	context.JSON(http.StatusAccepted, gin.H{"id": order.ID})
 }

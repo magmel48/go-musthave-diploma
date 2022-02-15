@@ -15,6 +15,8 @@ type Auth interface {
 
 var ErrInvalidCredentials = errors.New("invalid credentials")
 
+const UserIDKey = "user_id"
+
 type Service struct {
 	repository users.Repository
 }
@@ -24,7 +26,7 @@ func NewService(repository users.Repository) *Service {
 }
 
 func (service *Service) CreateNew(ctx context.Context, user users.User) (*users.User, error) {
-	u, err := service.repository.Find(ctx, user)
+	u, err := service.repository.Find(ctx, user.Login)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +49,7 @@ func (service *Service) CreateNew(ctx context.Context, user users.User) (*users.
 }
 
 func (service *Service) CheckUser(ctx context.Context, user users.User) (int64, error) {
-	u, err := service.repository.Find(ctx, user)
+	u, err := service.repository.Find(ctx, user.Login)
 	if err != nil {
 		return 0, err
 	}

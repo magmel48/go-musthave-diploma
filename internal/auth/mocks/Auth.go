@@ -36,14 +36,16 @@ func (_m *Auth) CheckUser(ctx context.Context, user users.User) (int64, error) {
 }
 
 // CreateNew provides a mock function with given fields: ctx, user
-func (_m *Auth) CreateNew(ctx context.Context, user users.User) (int64, error) {
+func (_m *Auth) CreateNew(ctx context.Context, user users.User) (*users.User, error) {
 	ret := _m.Called(ctx, user)
 
-	var r0 int64
-	if rf, ok := ret.Get(0).(func(context.Context, users.User) int64); ok {
+	var r0 *users.User
+	if rf, ok := ret.Get(0).(func(context.Context, users.User) *users.User); ok {
 		r0 = rf(ctx, user)
 	} else {
-		r0 = ret.Get(0).(int64)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*users.User)
+		}
 	}
 
 	var r1 error

@@ -3,6 +3,8 @@
 package mocks
 
 import (
+	context "context"
+
 	orders "github.com/magmel48/go-musthave-diploma/internal/orders"
 	mock "github.com/stretchr/testify/mock"
 )
@@ -12,16 +14,48 @@ type Repository struct {
 	mock.Mock
 }
 
-// Create provides a mock function with given fields: order
-func (_m *Repository) Create(order orders.Order) error {
-	ret := _m.Called(order)
+// Create provides a mock function with given fields: ctx, order
+func (_m *Repository) Create(ctx context.Context, order orders.Order) (*orders.Order, error) {
+	ret := _m.Called(ctx, order)
 
-	var r0 error
-	if rf, ok := ret.Get(0).(func(orders.Order) error); ok {
-		r0 = rf(order)
+	var r0 *orders.Order
+	if rf, ok := ret.Get(0).(func(context.Context, orders.Order) *orders.Order); ok {
+		r0 = rf(ctx, order)
 	} else {
-		r0 = ret.Error(0)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*orders.Order)
+		}
 	}
 
-	return r0
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, orders.Order) error); ok {
+		r1 = rf(ctx, order)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FindUserOrder provides a mock function with given fields: ctx, orderNumber, userID
+func (_m *Repository) FindUserOrder(ctx context.Context, orderNumber string, userID int64) (*orders.Order, error) {
+	ret := _m.Called(ctx, orderNumber, userID)
+
+	var r0 *orders.Order
+	if rf, ok := ret.Get(0).(func(context.Context, string, int64) *orders.Order); ok {
+		r0 = rf(ctx, orderNumber, userID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*orders.Order)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string, int64) error); ok {
+		r1 = rf(ctx, orderNumber, userID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }

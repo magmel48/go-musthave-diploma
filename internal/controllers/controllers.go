@@ -23,8 +23,6 @@ type App struct {
 	auth    auth.Auth
 }
 
-const UserIDKey = "user_id"
-
 func (app *App) Init() error {
 	if config.DatabaseDSN == "" {
 		return errors.New("no db connection details provided")
@@ -50,17 +48,23 @@ func (app *App) Init() error {
 
 func (app *App) Handler() *gin.Engine {
 	r := gin.Default()
+	r.Use(gin.Recovery())
 
 	store := cookie.NewStore([]byte(config.SessionsSecret))
 	r.Use(sessions.Sessions("session", store))
 
 	r.POST("/api/user/register", app.register)
 	r.POST("/api/user/login", app.login)
-	r.POST("/api/user/orders", app.calculateOrder)
-	r.GET("/api/user/orders", orderList)
-	r.GET("/api/user/balance", getBalance)
-	r.POST("/api/user/balance/withdraw", withdraw)
-	r.GET("/api/user/balance/withdrawals", getWithdrawals)
+
+	authorized := r.Group("/api/user")
+	authorized.Use(auth.Middleware())
+	{
+		authorized.POST("/orders", app.calculateOrder)
+		authorized.GET("/orders", app.orderList)
+		authorized.GET("/balance", app.getBalance)
+		authorized.POST("/balance/withdraw", app.withdraw)
+		authorized.GET("/balance/withdrawals", app.getWithdrawals)
+	}
 
 	return r
 }

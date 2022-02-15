@@ -1,7 +1,11 @@
 package controllers
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+	"net/http"
+)
 
-func getBalance(context *gin.Context) {
-	// TODO
+func (app *App) getBalance(context *gin.Context) {
+	// TODO implement
+	context.Status(http.StatusInternalServerError)
 }

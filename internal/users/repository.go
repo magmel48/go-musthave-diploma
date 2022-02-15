@@ -11,7 +11,7 @@ import (
 
 //go:generate mockery --name=Repository
 type Repository interface {
-	Find(ctx context.Context, user User) (*User, error)
+	Find(ctx context.Context, login string) (*User, error)
 	Create(ctx context.Context, user User) (*User, error)
 }
 
@@ -25,9 +25,9 @@ func NewRepository(db *sql.DB) *PostgreSQLRepository {
 	return &PostgreSQLRepository{db: db}
 }
 
-func (repository *PostgreSQLRepository) Find(ctx context.Context, user User) (*User, error) {
+func (repository *PostgreSQLRepository) Find(ctx context.Context, login string) (*User, error) {
 	rows, err := repository.db.QueryContext(
-		ctx, `SELECT "id", "login", "password" FROM "users" WHERE "login" = $1`, user.Login)
+		ctx, `SELECT "id", "login", "password" FROM "users" WHERE "login" = $1`, login)
 	if err != nil {
 		return nil, err
 	}

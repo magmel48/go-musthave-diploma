@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/magmel48/go-musthave-diploma/internal/auth"
 	"github.com/magmel48/go-musthave-diploma/internal/logger"
 	"github.com/magmel48/go-musthave-diploma/internal/users"
 	"go.uber.org/zap"
@@ -39,7 +40,7 @@ func (app *App) register(context *gin.Context) {
 	}
 
 	session := sessions.Default(context)
-	session.Set(UserIDKey, u.ID)
+	session.Set(auth.UserIDKey, u.ID)
 	err = session.Save()
 
 	if err != nil {
