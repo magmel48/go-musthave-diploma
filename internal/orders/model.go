@@ -8,10 +8,10 @@ var UnprocessedStatuses = []string{"NEW", "PROCESSING"}
 
 // Order represents order transfer object.
 type Order struct {
-	ID         int64
-	Number     string
-	Status     string
-	Accrual    float64
-	UserID     int64
-	UploadedAt time.Time
+	ID         int64     `json:"-"`
+	Number     string    `json:"number"`
+	Status     string    `json:"status"`
+	Accrual    float64   `json:"accrual,omitempty"`
+	UserID     int64     `json:"-"`
+	UploadedAt time.Time `json:"uploaded_at"`
 }

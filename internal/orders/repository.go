@@ -65,7 +65,7 @@ func (repository *PostgreSQLRepository) FindUserOrder(ctx context.Context, order
 func (repository *PostgreSQLRepository) FindUserOrders(ctx context.Context, userID int64) ([]Order, error) {
 	rows, err := repository.db.QueryContext(
 		ctx,
-		`SELECT "number", "status", "accrual", "uploaded_at" FROM "orders" WHERE "user_id" = $1 ORDER BY "uloaded_at" ASC`, userID)
+		`SELECT "number", "status", "accrual", "uploaded_at" FROM "orders" WHERE "user_id" = $1 ORDER BY "uploaded_at" ASC`, userID)
 	if err != nil {
 		return nil, err
 	}
