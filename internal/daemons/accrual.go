@@ -45,6 +45,7 @@ func (job *ExternalAccrualJob) Start() {
 			continue
 		}
 
+		// TODO fix concurrent run
 		if order.Status != response.Status {
 			logger.Info("status updated", zap.Int64("id", order.ID), zap.String("status", response.Status))
 
