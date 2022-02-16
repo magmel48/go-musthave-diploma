@@ -6,6 +6,7 @@ import (
 	"github.com/magmel48/go-musthave-diploma/internal/logger"
 	"go.uber.org/zap"
 	"net/http"
+	"net/url"
 )
 
 // OrderResponse represents response from accrual service about order status and reward.
@@ -26,6 +27,11 @@ type ExternalService struct {
 }
 
 func NewExternalService(client *http.Client, baseURL string) *ExternalService {
+	if _, err := url.Parse(baseURL); err != nil {
+		// there is assumption about no protocol presence
+		baseURL = "http://" + baseURL
+	}
+
 	return &ExternalService{
 		Client:  client,
 		baseURL: baseURL,

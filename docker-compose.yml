@@ -20,11 +20,19 @@ services:
     networks:
       - diploma
 
-# TODO run accrual also as alpine+copy linux distribution file
 #  accrual:
 #    container_name: accrual_container
 #    environment:
 #      RUN_ADDRESS: "${ACCRUAL_SYSTEM_ADDRESS}"
+#    build:
+#      dockerfile: Dockerfile
+#      context: .
+#    ports:
+#      - "8081:8081"
+#    depends_on:
+#      - postgres
+#    links:
+#      - postgres
 #    networks:
 #      - diploma
 
