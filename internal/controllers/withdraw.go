@@ -7,6 +7,8 @@ import (
 	"github.com/joeljunstrom/go-luhn"
 	"github.com/magmel48/go-musthave-diploma/internal/auth"
 	"github.com/magmel48/go-musthave-diploma/internal/balances"
+	"github.com/magmel48/go-musthave-diploma/internal/logger"
+	"go.uber.org/zap"
 	"net/http"
 )
 
@@ -25,12 +27,12 @@ func (app *App) withdraw(context *gin.Context) {
 		return
 	}
 
-	if !luhn.Valid(withdrawalRequest.Order) {
+	if !luhn.Valid(withdrawalRequest.Order) || withdrawalRequest.Sum <= 0 {
 		context.Status(http.StatusUnprocessableEntity)
 		return
 	}
 
-	err = app.balances.Change(context, userID, withdrawalRequest.Sum)
+	err = app.balances.Change(context, userID, -withdrawalRequest.Sum)
 	if err != nil {
 		if errors.Is(err, balances.ErrInsufficientFunds) {
 			context.JSON(http.StatusPaymentRequired, gin.H{"error": "insufficient funds"})
@@ -42,7 +44,12 @@ func (app *App) withdraw(context *gin.Context) {
 	}
 
 	// if balance check is ok - add the request into withdrawals list
-	// TODO implement
+	err = app.withdrawals.Create(context, userID, withdrawalRequest.Order, withdrawalRequest.Sum)
+	if err != nil {
+		logger.Error("POST /withdrawals error", zap.Error(err))
+		context.Status(http.StatusInternalServerError)
+		return
+	}
 
 	context.Status(http.StatusOK)
 }

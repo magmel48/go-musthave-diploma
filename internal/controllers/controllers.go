@@ -15,16 +15,18 @@ import (
 	"github.com/magmel48/go-musthave-diploma/internal/daemons"
 	"github.com/magmel48/go-musthave-diploma/internal/orders"
 	"github.com/magmel48/go-musthave-diploma/internal/users"
+	"github.com/magmel48/go-musthave-diploma/internal/withdrawals"
 	"time"
 )
 
 type App struct {
-	ctx      context.Context
-	db       *sql.DB
-	auth     auth.Auth
-	users    users.Repository
-	orders   orders.Repository
-	balances balances.Repository
+	ctx         context.Context
+	db          *sql.DB
+	auth        auth.Auth
+	users       users.Repository
+	orders      orders.Repository
+	balances    balances.Repository
+	withdrawals withdrawals.Repository
 }
 
 func (app *App) Init(ctx context.Context) error {
@@ -47,6 +49,7 @@ func (app *App) Init(ctx context.Context) error {
 
 	app.orders = orders.NewPostgreSQLRepository(app.db)
 	app.balances = balances.NewPostgreSQLRepository(app.db)
+	app.withdrawals = withdrawals.NewPostgreSQLRepository(app.db)
 
 	// run daemon for order updates checking
 	daemon := daemons.NewExternalAccrualJob(ctx, app.db)
