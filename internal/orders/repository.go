@@ -13,7 +13,7 @@ import (
 type Repository interface {
 	Create(ctx context.Context, orderNumber string, userID int64) (*Order, error)
 	FindUserOrder(ctx context.Context, orderNumber string, userID int64) (*Order, error)
-	FindUserOrders(ctx context.Context, userID int64) ([]Order, error)
+	FindByUser(ctx context.Context, userID int64) ([]Order, error)
 	FindUnprocessedOrders(ctx context.Context) ([]Order, error)
 	Update(ctx context.Context, order Order) (int64, error)
 }
@@ -67,8 +67,8 @@ func (repository *PostgreSQLRepository) FindUserOrder(ctx context.Context, order
 	return &result, nil
 }
 
-// FindUserOrders finds all orders belong to specified user.
-func (repository *PostgreSQLRepository) FindUserOrders(ctx context.Context, userID int64) ([]Order, error) {
+// FindByUser finds all orders belong to specified user.
+func (repository *PostgreSQLRepository) FindByUser(ctx context.Context, userID int64) ([]Order, error) {
 	rows, err := repository.db.QueryContext(
 		ctx,
 		`SELECT "number", "status", "accrual", "uploaded_at" FROM "orders" WHERE "user_id" = $1 ORDER BY "uploaded_at" ASC`, userID)

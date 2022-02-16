@@ -11,7 +11,7 @@ import (
 func (app *App) orderList(context *gin.Context) {
 	userID := context.MustGet(auth.UserIDKey).(int64)
 
-	orders, err := app.orders.FindUserOrders(context, userID)
+	orders, err := app.orders.FindByUser(context, userID)
 	if err != nil {
 		logger.Error("GET /orders error", zap.Error(err))
 		context.Status(http.StatusInternalServerError)
