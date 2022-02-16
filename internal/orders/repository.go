@@ -15,7 +15,7 @@ type Repository interface {
 	FindUserOrder(ctx context.Context, orderNumber string, userID int64) (*Order, error)
 	FindUserOrders(ctx context.Context, userID int64) ([]Order, error)
 	FindUnprocessedOrders(ctx context.Context) ([]Order, error)
-	Update(ctx context.Context, order Order) error
+	Update(ctx context.Context, order Order) (int64, error)
 }
 
 var ErrConflict = errors.New("conflict")
@@ -127,10 +127,14 @@ func (repository *PostgreSQLRepository) FindUnprocessedOrders(ctx context.Contex
 	return orders, nil
 }
 
-func (repository *PostgreSQLRepository) Update(ctx context.Context, order Order) error {
-	_, err := repository.db.ExecContext(
+func (repository *PostgreSQLRepository) Update(ctx context.Context, order Order) (int64, error) {
+	result, err := repository.db.ExecContext(
 		ctx,
 		`UPDATE "orders" SET "status" = $1, "accrual" = $2 WHERE "id" = $2`, order.Status, order.Accrual, order.ID)
 
-	return err
+	if err != nil {
+		return 0, err
+	}
+
+	return result.RowsAffected()
 }

@@ -45,20 +45,23 @@ func (job *ExternalAccrualJob) Start() {
 			continue
 		}
 
-		// TODO fix concurrent run
 		if order.Status != response.Status {
 			logger.Info("status updated", zap.Int64("id", order.ID), zap.String("status", response.Status))
 
-			if err := job.orders.Update(job.ctx, orders.Order{
+			if rowsAffected, err := job.orders.Update(job.ctx, orders.Order{
 				ID:      order.ID,
 				Accrual: response.Accrual,
 				Status:  response.Status,
 			}); err != nil {
 				logger.Error("order update error", zap.Error(err))
-			}
-
-			if err = job.balances.Change(job.ctx, order.UserID, response.Accrual); err != nil {
-				logger.Error("balance update error", zap.Error(err))
+			} else {
+				if rowsAffected == 1 {
+					if err = job.balances.Change(job.ctx, order.UserID, response.Accrual); err != nil {
+						logger.Error("balance update error", zap.Error(err))
+					}
+				} else {
+					logger.Error("more than one order affected while order status and accrual update")
+				}
 			}
 		}
 	}
