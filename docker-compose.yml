@@ -9,7 +9,7 @@ services:
       ACCRUAL_SYSTEM_ADDRESS: "${ACCRUAL_SYSTEM_ADDRESS}"
       DATABASE_URI: "${DATABASE_URI}"
     build:
-      dockerfile: Dockerfile
+      dockerfile: cmd/gophermart/Dockerfile
       context: .
     ports:
       - "8080:8080"
@@ -20,21 +20,21 @@ services:
     networks:
       - diploma
 
-#  accrual:
-#    container_name: accrual_container
-#    environment:
-#      RUN_ADDRESS: "${ACCRUAL_SYSTEM_ADDRESS}"
-#    build:
-#      dockerfile: Dockerfile
-#      context: .
-#    ports:
-#      - "8081:8081"
-#    depends_on:
-#      - postgres
-#    links:
-#      - postgres
-#    networks:
-#      - diploma
+  accrual:
+    container_name: accrual_container
+    environment:
+      RUN_ADDRESS: "${ACCRUAL_SYSTEM_ADDRESS}"
+    build:
+      dockerfile: cmd/accrual/Dockerfile
+      context: .
+    ports:
+      - "8081:8081"
+    depends_on:
+      - postgres
+    links:
+      - postgres
+    networks:
+      - diploma
 
   postgres:
     container_name: postgres_container
