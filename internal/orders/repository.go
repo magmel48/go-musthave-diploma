@@ -130,7 +130,7 @@ func (repository *PostgreSQLRepository) FindUnprocessedOrders(ctx context.Contex
 func (repository *PostgreSQLRepository) Update(ctx context.Context, order Order) (int64, error) {
 	result, err := repository.db.ExecContext(
 		ctx,
-		`UPDATE "orders" SET "status" = $1, "accrual" = $2 WHERE "id" = $2`, order.Status, order.Accrual, order.ID)
+		`UPDATE "orders" SET "status" = $1, "accrual" = $2 WHERE "id" = $3`, order.Status, order.Accrual, order.ID)
 
 	if err != nil {
 		return 0, err
