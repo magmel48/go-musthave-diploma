@@ -40,6 +40,32 @@ func (repository *PostgreSQLRepository) FindByUser(ctx context.Context, userID i
 }
 
 func (repository *PostgreSQLRepository) Change(ctx context.Context, userID int64, amount float64) error {
+	if amount < 0 {
+		if result, err := repository.db.ExecContext(
+			ctx,
+			`UPDATE "balances" SET "current" = "current" + $1, "withdrawn" = "withdrawn" - $1 WHERE "user_id" = $2`,
+			amount, userID); err != nil {
+			if strings.Contains(err.Error(), pgerrcode.CheckViolation) {
+				return ErrInsufficientFunds
+			}
+
+			return err
+		} else {
+			rowsAffected, err := result.RowsAffected()
+			if err != nil {
+				return err
+			}
+
+			// if no rows affected - no funds then on user balance
+			if rowsAffected != 1 {
+				return ErrInsufficientFunds
+			}
+		}
+
+		return nil
+	}
+
+	// in case of positive amount to add on top of user balance - just safely upsert
 	if _, err := repository.db.ExecContext(
 		ctx,
 		`INSERT INTO "balances" ("user_id", "current") VALUES ($1, $2)
