@@ -9,6 +9,7 @@ import (
 	"github.com/magmel48/go-musthave-diploma/internal/logger"
 	"github.com/magmel48/go-musthave-diploma/internal/orders"
 	"go.uber.org/zap"
+	"net/http"
 )
 
 type AccrualJob interface {
@@ -25,7 +26,7 @@ type ExternalAccrualJob struct {
 func NewExternalAccrualJob(ctx context.Context, db *sql.DB) *ExternalAccrualJob {
 	return &ExternalAccrualJob{
 		ctx:      ctx,
-		accrual:  accrual.NewExternalService(config.AccrualServiceAddress),
+		accrual:  accrual.NewExternalService(&http.Client{}, config.AccrualServiceAddress),
 		orders:   orders.NewPostgreSQLRepository(db),
 		balances: balances.NewPostgreSQLRepository(db),
 	}

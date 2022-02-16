@@ -21,21 +21,24 @@ type Service interface {
 }
 
 type ExternalService struct {
+	Client  *http.Client
 	baseURL string
 }
 
-func NewExternalService(baseURL string) *ExternalService {
-	return &ExternalService{baseURL: baseURL}
+func NewExternalService(client *http.Client, baseURL string) *ExternalService {
+	return &ExternalService{
+		Client:  client,
+		baseURL: baseURL,
+	}
 }
 
 func (service *ExternalService) GetOrder(ctx context.Context, orderNumber string) (*OrderResponse, error) {
-	client := http.Client{}
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, service.baseURL+"/api/orders/"+orderNumber, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := client.Do(req)
+	resp, err := service.Client.Do(req)
 	if err != nil {
 		return nil, err
 	}

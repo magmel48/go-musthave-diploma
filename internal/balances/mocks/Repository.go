@@ -15,6 +15,20 @@ type Repository struct {
 	mock.Mock
 }
 
+// Change provides a mock function with given fields: ctx, userID, amount
+func (_m *Repository) Change(ctx context.Context, userID int64, amount float64) error {
+	ret := _m.Called(ctx, userID, amount)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, int64, float64) error); ok {
+		r0 = rf(ctx, userID, amount)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // FindByUser provides a mock function with given fields: ctx, userID
 func (_m *Repository) FindByUser(ctx context.Context, userID int64) (*balances.Balance, error) {
 	ret := _m.Called(ctx, userID)
