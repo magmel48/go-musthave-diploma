@@ -4,7 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"github.com/jackc/pgerrcode"
 	"github.com/magmel48/go-musthave-diploma/internal/logger"
+	"strings"
 )
 
 //go:generate mockery --name=Repository
@@ -37,6 +39,10 @@ func (repository *PostgreSQLRepository) Create(ctx context.Context, orderNumber 
 		`INSERT INTO "orders" ("number", "user_id") VALUES ($1, $2) RETURNING "id", "number", "status", "user_id", "uploaded_at"`,
 		orderNumber, userID).Scan(
 		&result.ID, &result.Number, &result.Status, &result.UserID, &result.UploadedAt); err != nil {
+		if strings.Contains(err.Error(), pgerrcode.UniqueViolation) {
+			return nil, ErrConflict
+		}
+
 		return nil, err
 	}
 

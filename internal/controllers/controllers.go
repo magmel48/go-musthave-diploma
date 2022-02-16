@@ -56,7 +56,7 @@ func (app *App) Init(ctx context.Context) error {
 		panic(err)
 	}
 
-	//s.StartAsync()
+	s.StartAsync()
 
 	return nil
 }
