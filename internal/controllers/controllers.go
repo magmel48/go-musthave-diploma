@@ -21,7 +21,6 @@ import (
 
 type App struct {
 	ctx         context.Context
-	db          *sql.DB
 	auth        auth.Auth
 	users       users.Repository
 	orders      orders.Repository
@@ -34,25 +33,24 @@ func (app *App) Init(ctx context.Context) error {
 		return errors.New("no db connection details provided")
 	}
 
-	var err error
-	app.db, err = sql.Open("pgx", config.DatabaseDSN)
+	db, err := sql.Open("pgx", config.DatabaseDSN)
 	if err != nil {
 		return err
 	}
 
-	app.db.SetMaxOpenConns(30)
-	app.db.SetMaxIdleConns(30)
-	app.db.SetConnMaxIdleTime(10 * time.Second)
+	db.SetMaxOpenConns(30)
+	db.SetMaxIdleConns(30)
+	db.SetConnMaxIdleTime(10 * time.Second)
 
-	app.users = users.NewPostgreSQLRepository(app.db)
+	app.users = users.NewPostgreSQLRepository(db)
 	app.auth = auth.NewService(app.users)
 
-	app.orders = orders.NewPostgreSQLRepository(app.db)
-	app.balances = balances.NewPostgreSQLRepository(app.db)
-	app.withdrawals = withdrawals.NewPostgreSQLRepository(app.db)
+	app.orders = orders.NewPostgreSQLRepository(db)
+	app.balances = balances.NewPostgreSQLRepository(db)
+	app.withdrawals = withdrawals.NewPostgreSQLRepository(db)
 
 	// run daemon for order updates checking
-	daemon := daemons.NewExternalAccrualJob(ctx, app.db)
+	daemon := daemons.NewExternalAccrualJob(ctx, db)
 	s := gocron.NewScheduler(time.UTC)
 	_, err = s.Every(5).Seconds().Do(daemon.Start)
 	if err != nil {
