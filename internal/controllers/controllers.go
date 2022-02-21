@@ -54,7 +54,7 @@ func (app *App) Init(ctx context.Context) error {
 	s := gocron.NewScheduler(time.UTC)
 	_, err = s.Every(5).Seconds().Do(daemon.Start)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	s.StartAsync()
