@@ -102,7 +102,7 @@ func TestPostgreSQLRepository_FindByUser(t *testing.T) {
 				db: tt.fields.db,
 			}
 
-			got, err := repository.FindByUser(tt.args.ctx, tt.args.userID)
+			got, err := repository.ListByUser(tt.args.ctx, tt.args.userID)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ListByUser() error = %v, wantErr %v", err, tt.wantErr)
 				return

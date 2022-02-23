@@ -11,7 +11,7 @@ import (
 func (app *App) getWithdrawals(context *gin.Context) {
 	userID := context.MustGet(auth.UserIDKey).(int64)
 
-	withdrawals, err := app.withdrawals.FindByUser(context, userID)
+	withdrawals, err := app.withdrawals.ListByUser(context, userID)
 	if err != nil {
 		logger.Error("GET /withdrawals error", zap.Error(err))
 		context.Status(http.StatusInternalServerError)

@@ -48,6 +48,7 @@ func (app *App) calculateOrder(context *gin.Context) {
 			// 409 - spec: order number already loaded by another user
 			context.JSON(http.StatusConflict, gin.H{"error": "order already exists"})
 		} else {
+			logger.Error("POST /orders: create order error", zap.Error(err))
 			context.Status(http.StatusInternalServerError)
 		}
 

@@ -9,7 +9,7 @@ import (
 //go:generate mockery --name=Repository
 type Repository interface {
 	Create(ctx context.Context, userID int64, orderNumber string, amount float64) error
-	FindByUser(ctx context.Context, userID int64) ([]Withdrawal, error)
+	ListByUser(ctx context.Context, userID int64) ([]Withdrawal, error)
 }
 
 type PostgreSQLRepository struct {
@@ -27,7 +27,7 @@ func (repository *PostgreSQLRepository) Create(ctx context.Context, userID int64
 	return err
 }
 
-func (repository *PostgreSQLRepository) FindByUser(ctx context.Context, userID int64) ([]Withdrawal, error) {
+func (repository *PostgreSQLRepository) ListByUser(ctx context.Context, userID int64) ([]Withdrawal, error) {
 	rows, err := repository.db.QueryContext(
 		ctx,
 		`SELECT "order", "sum", "processed_at" FROM "withdrawals" WHERE "user_id" = $1 ORDER BY "processed_at" ASC`, userID)
