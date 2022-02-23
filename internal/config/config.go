@@ -2,8 +2,6 @@ package config
 
 import (
 	"github.com/alexflint/go-arg"
-	"os"
-	"strings"
 )
 
 type config struct {
@@ -23,10 +21,10 @@ var (
 func init() {
 	cfg := config{}
 
-	// to avoid an issues with local testing
-	if strings.HasSuffix(os.Args[0], ".test") {
-		return
-	}
+	// uncomment the following lines to avoid an issues with local testing
+	//if strings.HasSuffix(os.Args[0], ".test") {
+	//	return
+	//}
 
 	arg.MustParse(&cfg)
 
