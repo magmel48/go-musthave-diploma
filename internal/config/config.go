@@ -1,5 +1,11 @@
 package config
 
+import (
+	"github.com/alexflint/go-arg"
+	"os"
+	"strings"
+)
+
 type config struct {
 	BaseServiceAddress    string `arg:"-a,env:RUN_ADDRESS" default:"localhost:8080"`
 	DatabaseDSN           string `arg:"-d,env:DATABASE_URI"`
@@ -17,10 +23,12 @@ var (
 func init() {
 	cfg := config{}
 
-	// uncomment the 3 following lines to avoid an issues with local testing
-	//if strings.HasSuffix(os.Args[0], ".test") {
-	//	return
-	//}
+	// to avoid an issues with local testing
+	if strings.HasSuffix(os.Args[0], ".test") {
+		return
+	}
+
+	arg.MustParse(&cfg)
 
 	BaseServiceAddress = cfg.BaseServiceAddress
 	DatabaseDSN = cfg.DatabaseDSN
