@@ -3,6 +3,8 @@ package auth
 import (
 	"context"
 	"errors"
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-gonic/gin"
 	"github.com/magmel48/go-musthave-diploma/internal/users"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -11,6 +13,7 @@ import (
 type Auth interface {
 	CreateNew(ctx context.Context, user users.User) (*users.User, error)
 	CheckUser(ctx context.Context, user users.User) (int64, error)
+	StoreUser(ctx *gin.Context, user users.User) error
 }
 
 var ErrInvalidCredentials = errors.New("invalid credentials")
@@ -59,6 +62,14 @@ func (service *Service) CheckUser(ctx context.Context, user users.User) (int64, 
 	}
 
 	return 0, ErrInvalidCredentials
+}
+
+func (service *Service) StoreUser(ctx *gin.Context, user users.User) error {
+	session := sessions.Default(ctx)
+	session.Set(UserIDKey, user.ID)
+	err := session.Save()
+
+	return err
 }
 
 func hashPassword(password string) (string, error) {

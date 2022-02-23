@@ -23,13 +23,13 @@ func (app *App) calculateOrder(context *gin.Context) {
 	}
 
 	id := string(payload)
-	if !luhn.Valid(id) {
+	if id == "" || !luhn.Valid(id) {
 		// 422 - spec: invalid order number
 		context.Status(http.StatusUnprocessableEntity)
 		return
 	}
 
-	order, err := app.orders.FindUserOrder(context, id, userID)
+	order, err := app.orders.FindByUser(context, id, userID)
 	if err != nil {
 		logger.Error("POST /orders: find order error", zap.Error(err))
 		context.Status(http.StatusInternalServerError)

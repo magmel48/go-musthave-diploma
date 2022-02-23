@@ -38,7 +38,7 @@ func (_m *Repository) Create(ctx context.Context, orderNumber string, userID int
 }
 
 // FindByUser provides a mock function with given fields: ctx, userID
-func (_m *Repository) FindByUser(ctx context.Context, userID int64) ([]orders.Order, error) {
+func (_m *Repository) ListByUser(ctx context.Context, userID int64) ([]orders.Order, error) {
 	ret := _m.Called(ctx, userID)
 
 	var r0 []orders.Order
@@ -84,7 +84,7 @@ func (_m *Repository) FindUnprocessedOrders(ctx context.Context) ([]orders.Order
 }
 
 // FindUserOrder provides a mock function with given fields: ctx, orderNumber, userID
-func (_m *Repository) FindUserOrder(ctx context.Context, orderNumber string, userID int64) (*orders.Order, error) {
+func (_m *Repository) FindByUser(ctx context.Context, orderNumber string, userID int64) (*orders.Order, error) {
 	ret := _m.Called(ctx, orderNumber, userID)
 
 	var r0 *orders.Order

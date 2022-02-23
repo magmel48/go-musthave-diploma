@@ -1,7 +1,8 @@
 package config
 
 import (
-	"github.com/alexflint/go-arg"
+	"os"
+	"strings"
 )
 
 type config struct {
@@ -20,7 +21,11 @@ var (
 
 func init() {
 	cfg := config{}
-	arg.MustParse(&cfg)
+
+	// to avoid an issues with testing
+	if strings.HasSuffix(os.Args[0], ".test") {
+		return
+	}
 
 	BaseServiceAddress = cfg.BaseServiceAddress
 	DatabaseDSN = cfg.DatabaseDSN

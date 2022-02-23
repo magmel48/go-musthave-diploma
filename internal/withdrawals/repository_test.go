@@ -104,12 +104,12 @@ func TestPostgreSQLRepository_FindByUser(t *testing.T) {
 
 			got, err := repository.FindByUser(tt.args.ctx, tt.args.userID)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("FindByUser() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("ListByUser() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("FindByUser() got = %v, want %v", got, tt.want)
+				t.Errorf("ListByUser() got = %v, want %v", got, tt.want)
 			}
 		})
 	}

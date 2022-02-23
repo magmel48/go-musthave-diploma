@@ -3,7 +3,6 @@ package controllers
 import (
 	"encoding/json"
 	"errors"
-	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/magmel48/go-musthave-diploma/internal/auth"
 	"github.com/magmel48/go-musthave-diploma/internal/logger"
@@ -34,11 +33,7 @@ func (app *App) login(context *gin.Context) {
 		user.ID = id
 	}
 
-	// TODO find a way to remove from here
-	session := sessions.Default(context)
-	session.Set(auth.UserIDKey, user.ID)
-	err = session.Save()
-
+	err = app.auth.StoreUser(context, user)
 	if err != nil {
 		logger.Error("POST /login: saving session error")
 		context.Status(http.StatusInternalServerError)
