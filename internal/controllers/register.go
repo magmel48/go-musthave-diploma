@@ -35,6 +35,8 @@ func (app *App) register(context *gin.Context) {
 		}
 
 		return
+	} else {
+		user.ID = u.ID
 	}
 
 	err = app.auth.StoreUser(context, user)
