@@ -1,25 +1,14 @@
-# go-musthave-diploma-tpl
+# go-musthave-diploma
 
-Шаблон репозитория для индивидуального дипломного проекта курса "Самостоятельный Go-разработчик"
+## Run locally
 
-# Начало работы
-
-1. Склонируйте репозиторий в любую подходящую директорию на вашем компьютере
-2. В корне репозитория выполните команду `go mod init <name>` (где `<name>` - адрес вашего репозитория на Github без
-   префикса `https://`) для создания модуля
-
-# Обновление шаблона
-
-Чтобы иметь возможность получать обновления автотестов и других частей шаблона выполните следующую команды:
-
-```
-git remote add -m master template https://github.com/yandex-praktikum/go-musthave-diploma-tpl.git
+```shell
+cp .env.sample .env
+docker-compose --env-file .env up
 ```
 
-Для обновления кода автотестов выполните команду:
+## Nice to have
 
-```
-git fetch template && git checkout template/master .github
-```
-
-затем добавьте полученые изменения в свой репозиторий.
+1. Change Gin logger to project zap logger.
+2. Find a workaround for `Sync()` issue with zap logger (`inappropriate ioctl for device`).
+3. Create a helper for error serialization instead of using raw `gin.H`.
