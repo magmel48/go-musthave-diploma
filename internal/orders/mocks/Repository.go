@@ -37,22 +37,22 @@ func (_m *Repository) Create(ctx context.Context, orderNumber string, userID int
 	return r0, r1
 }
 
-// FindByUser provides a mock function with given fields: ctx, userID
-func (_m *Repository) ListByUser(ctx context.Context, userID int64) ([]orders.Order, error) {
-	ret := _m.Called(ctx, userID)
+// FindByUser provides a mock function with given fields: ctx, orderNumber, userID
+func (_m *Repository) FindByUser(ctx context.Context, orderNumber string, userID int64) (*orders.Order, error) {
+	ret := _m.Called(ctx, orderNumber, userID)
 
-	var r0 []orders.Order
-	if rf, ok := ret.Get(0).(func(context.Context, int64) []orders.Order); ok {
-		r0 = rf(ctx, userID)
+	var r0 *orders.Order
+	if rf, ok := ret.Get(0).(func(context.Context, string, int64) *orders.Order); ok {
+		r0 = rf(ctx, orderNumber, userID)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]orders.Order)
+			r0 = ret.Get(0).(*orders.Order)
 		}
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, int64) error); ok {
-		r1 = rf(ctx, userID)
+	if rf, ok := ret.Get(1).(func(context.Context, string, int64) error); ok {
+		r1 = rf(ctx, orderNumber, userID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -83,22 +83,22 @@ func (_m *Repository) FindUnprocessedOrders(ctx context.Context) ([]orders.Order
 	return r0, r1
 }
 
-// FindUserOrder provides a mock function with given fields: ctx, orderNumber, userID
-func (_m *Repository) FindByUser(ctx context.Context, orderNumber string, userID int64) (*orders.Order, error) {
-	ret := _m.Called(ctx, orderNumber, userID)
+// ListByUser provides a mock function with given fields: ctx, userID
+func (_m *Repository) ListByUser(ctx context.Context, userID int64) ([]orders.Order, error) {
+	ret := _m.Called(ctx, userID)
 
-	var r0 *orders.Order
-	if rf, ok := ret.Get(0).(func(context.Context, string, int64) *orders.Order); ok {
-		r0 = rf(ctx, orderNumber, userID)
+	var r0 []orders.Order
+	if rf, ok := ret.Get(0).(func(context.Context, int64) []orders.Order); ok {
+		r0 = rf(ctx, userID)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*orders.Order)
+			r0 = ret.Get(0).([]orders.Order)
 		}
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, string, int64) error); ok {
-		r1 = rf(ctx, orderNumber, userID)
+	if rf, ok := ret.Get(1).(func(context.Context, int64) error); ok {
+		r1 = rf(ctx, userID)
 	} else {
 		r1 = ret.Error(1)
 	}

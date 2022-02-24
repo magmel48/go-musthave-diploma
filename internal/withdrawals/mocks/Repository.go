@@ -28,8 +28,8 @@ func (_m *Repository) Create(ctx context.Context, userID int64, orderNumber stri
 	return r0
 }
 
-// FindByUser provides a mock function with given fields: ctx, userID
-func (_m *Repository) FindByUser(ctx context.Context, userID int64) ([]withdrawals.Withdrawal, error) {
+// ListByUser provides a mock function with given fields: ctx, userID
+func (_m *Repository) ListByUser(ctx context.Context, userID int64) ([]withdrawals.Withdrawal, error) {
 	ret := _m.Called(ctx, userID)
 
 	var r0 []withdrawals.Withdrawal

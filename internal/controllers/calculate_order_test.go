@@ -17,8 +17,7 @@ import (
 	"testing"
 )
 
-func createContext(body string) *gin.Context {
-	recorder := httptest.NewRecorder()
+func createGinContext(recorder *httptest.ResponseRecorder, body string) *gin.Context {
 	ctx, _ := gin.CreateTestContext(recorder)
 	ctx.Set(auth.UserIDKey, int64(1))
 
@@ -46,13 +45,19 @@ func TestApp_calculateOrder(t *testing.T) {
 		statusCode int
 	}
 
-	gin.SetMode(gin.TestMode)
-
 	wrongOrderNumber := "123"
 	correctOrderNumber := "12345678903"
 
 	ordersMock := &mocks.Repository{}
 	ordersMock.On("FindByUser", mock.Anything, mock.Anything, mock.Anything).Return(&orders.Order{}, nil)
+
+	emptyOrdersMock := &mocks.Repository{}
+	emptyOrdersMock.On(
+		"FindByUser", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
+	emptyOrdersMock.On(
+		"Create", mock.Anything, mock.Anything, mock.Anything).Return(&orders.Order{ID: 1}, nil)
+
+	recorder := httptest.NewRecorder()
 
 	tests := []struct {
 		name   string
@@ -63,14 +68,20 @@ func TestApp_calculateOrder(t *testing.T) {
 		{
 			name:   "returns 422 if order number is invalid",
 			fields: fields{ctx: context.TODO()},
-			args:   args{context: createContext(wrongOrderNumber)},
+			args:   args{context: createGinContext(recorder, wrongOrderNumber)},
 			want:   want{statusCode: http.StatusUnprocessableEntity},
 		},
 		{
 			name:   "returns 200 if the order number was already registered by the user",
 			fields: fields{ctx: context.TODO(), orders: ordersMock},
-			args:   args{context: createContext(correctOrderNumber)},
+			args:   args{context: createGinContext(recorder, correctOrderNumber)},
 			want:   want{statusCode: http.StatusOK},
+		},
+		{
+			name:   "returns 202 if order number was not registered before",
+			fields: fields{ctx: context.TODO(), orders: emptyOrdersMock},
+			args:   args{context: createGinContext(recorder, correctOrderNumber)},
+			want:   want{statusCode: http.StatusAccepted},
 		},
 	}
 
