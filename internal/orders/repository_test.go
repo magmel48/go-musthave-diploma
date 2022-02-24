@@ -20,6 +20,7 @@ func TestPostgreSQLRepository_Update(t *testing.T) {
 	status := "NEW"
 	accrual := 700.0
 	id := int64(99)
+	rowsAffected := int64(1)
 
 	db, sqlMock, _ := sqlmock.New()
 	e := sqlMock.ExpectExec(
@@ -39,7 +40,7 @@ func TestPostgreSQLRepository_Update(t *testing.T) {
 			name:    "should execute proper query",
 			fields:  fields{db: db},
 			args:    args{ctx: context.TODO(), order: Order{ID: id, Status: status, Accrual: accrual}},
-			want:    1,
+			want:    rowsAffected,
 			wantErr: false,
 		},
 	}
